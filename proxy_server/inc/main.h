@@ -29,6 +29,11 @@
 #define SEM_ID 250 /* ID del semaforo */
 #define MAX_ERRORS 20
 
+#define Ruta_Archivo_Error  "error_send.json"
+#define Ruta_Archivo_CFG    "cloud_cfg.json"
+#define Ruta_LOG_POST       "output_post"
+#define Ruta_Temperatura    "temperatura.json"
+ 
 typedef union smun
 {
     int val;
@@ -37,3 +42,4 @@ typedef union smun
 } smun;
 
 void productor_temperatura(int sem_set_id, char *shm_addr, struct sembuf sb, union smun arg);
+

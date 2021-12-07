@@ -22,7 +22,7 @@ int post_control(void)
     struct json_object *status = NULL;
     char *buffer_control;
 
-    buffer_control=obtener_string_de_file("output_post");
+    buffer_control=obtener_string_de_file(Ruta_LOG_POST);
     
     if(buffer_control == NULL)
     {
@@ -71,12 +71,12 @@ void post_http(char *medicion, time_t timestamp, char *url)
 
     if (PID == 0)
     {
-        execlp("rm", "rm", "-f", "output_post", NULL);
+        execlp("rm", "rm", "-f", Ruta_LOG_POST, NULL);
         exit(1);
     }
     wait(NULL);
 
-    file = open("output_post", O_WRONLY | O_CREAT, 0777);
+    file = open(Ruta_LOG_POST, O_WRONLY | O_CREAT, 0777);
     if (file == -1)
     {
         printf("Error al abrir el archivo\n");
@@ -131,7 +131,7 @@ int intenta_nuevamente_http(char *url)
 {
     char *buff_tx;
 
-    buff_tx=obtener_string_de_file("error_send.json");
+    buff_tx=obtener_string_de_file(Ruta_Archivo_Error);
 
     if(buff_tx == NULL)
     {
@@ -188,12 +188,12 @@ void post_paquete_http(char *buff_tx, char *url)
 
     if (PID == 0)
     {
-        execlp("rm", "rm", "-f", "output_post", NULL);
+        execlp("rm", "rm", "-f", Ruta_LOG_POST, NULL);
         exit(1);
     }
     wait(NULL);
 
-    file = open("output_post", O_WRONLY | O_CREAT, 0777);
+    file = open(Ruta_LOG_POST, O_WRONLY | O_CREAT, 0777);
     if (file == -1)
     {
         printf("Error al abrir el archivo\n");

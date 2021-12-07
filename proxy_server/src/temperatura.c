@@ -55,7 +55,7 @@ void productor_temperatura(int sem_set_id, char *shm_addr, struct sembuf sb, uni
         {
             /*Obtengo un hijo en el cual imprimo la salida del comando de temperatura*/
             int err, file;
-            file = open("temperatura.json", O_WRONLY | O_CREAT, 0777);
+            file = open(Ruta_Temperatura, O_WRONLY | O_CREAT, 0777);
             if (file == -1)
             {
                 printf("Error al abrir el archivo\n");
@@ -83,7 +83,7 @@ void productor_temperatura(int sem_set_id, char *shm_addr, struct sembuf sb, uni
 
         /*Me encargo de parsear el archivo en formato .json*/
 
-        buffer=obtener_string_de_file("temperatura.json");
+        buffer=obtener_string_de_file(Ruta_Temperatura);
 
         if(buffer==NULL)
         {

@@ -91,7 +91,7 @@ int main()
     sigemptyset(&muere_hijo.sa_mask);
     sigaction(SIGCHLD, &muere_hijo, NULL);
 
-    url = obtener_url("cloud_cfg.json");        /*Obtengo la URL desde el archivo de configuracion*/
+    url = obtener_url(Ruta_Archivo_CFG);        /*Obtengo la URL desde el archivo de configuracion*/
 
     if (url == NULL)
     {
@@ -205,7 +205,7 @@ int main()
         case Primera_Falla:
         {
             /*Creo el archivo de errores y me voy al estado de Erroneo*/
-            file_error_log = fopen("error_send.json", "w+");
+            file_error_log = fopen(Ruta_Archivo_Error, "w+");
             if (file_error_log == NULL)
             {
                 bucle_activado = 0;
@@ -240,7 +240,7 @@ int main()
             errados y me voy a un estado de funcionamiento perfecto.
             De fallar debo seguir completando el archivo.*/
 
-            file_error_log = fopen("error_send.json", "rw+");
+            file_error_log = fopen(Ruta_Archivo_Error, "rw+");
             fseek(file_error_log, 0, SEEK_END);
             fprintf(file_error_log, "\n}");
             fclose(file_error_log);
@@ -253,7 +253,7 @@ int main()
             else
             {
                 /*retrocedo el cambio*/
-                file_error_log = fopen("error_send.json", "rw+");
+                file_error_log = fopen(Ruta_Archivo_Error, "rw+");
                 fseek(file_error_log, -2, SEEK_END);
                 fprintf(file_error_log, "  ");
                 fclose(file_error_log);
@@ -268,7 +268,7 @@ int main()
             anteriores nuevamente.*/
             if (TX_STATE == Falla)
             {
-                file_error_log = fopen("error_send.json", "rw+");
+                file_error_log = fopen(Ruta_Archivo_Error, "rw+");
                 fseek(file_error_log, 0, SEEK_END);
                 fprintf(file_error_log, ",\n"
                                         "\t\"medicionN%d\":\n"
@@ -313,7 +313,7 @@ int main()
             semaforo_actual = 0;
     }
     /*Termino de completar el formato json en el archivo de error*/
-    file_error_log = fopen("error_send.json", "rw+");
+    file_error_log = fopen(Ruta_Archivo_Error, "rw+");
     fseek(file_error_log, 0, SEEK_END);
     fprintf(file_error_log, "\n}");
     fclose(file_error_log);
