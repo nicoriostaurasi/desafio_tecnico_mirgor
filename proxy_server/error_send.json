@@ -1,4 +1,10 @@
 {
 	"medicionN1":
-		{"valor":57.000,"timestamp":1638845779}
+		{"valor":60.000,"timestamp":1638849977},
+	"medicionN2":
+		{"valor":57.000,"timestamp":1638849978},
+	"medicionN3":
+		{"valor":59.000,"timestamp":1638849979},
+	"medicionN4":
+		{"valor":60.000,"timestamp":1638849979}
 }
