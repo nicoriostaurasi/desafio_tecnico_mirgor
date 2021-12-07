@@ -45,13 +45,14 @@ void handle_sigchild(int s)
 }
 
 char *get_url(char *ruta);
-void post_http(char *medicion,time_t timestamp, char *url);
+void post_http(char *medicion, time_t timestamp, char *url);
 int post_control(void);
 void productor_temperatura(int sem_set_id, char *shm_addr, struct sembuf sb, union smun arg);
-int transmision_http(char *medicion,time_t timestamp, char *url);
-int intenta_nuevamente_http(char* url);
-int transmision_paquete_http(char* buff_tx,char* url);
-void post_paquete_http(char* buff_tx, char* url);
+int transmision_http(char *medicion, time_t timestamp, char *url);
+int intenta_nuevamente_http(char *url);
+int transmision_paquete_http(char *buff_tx, char *url);
+void post_paquete_http(char *buff_tx, char *url);
+void curl_envio_http(char *buff_tx, char *url);
 
 int main()
 {
@@ -59,7 +60,7 @@ int main()
     int PID;                  /*PID que identifica nuestro hijo*/
     int semaforo_actual = 0;  /*Variable auxiliar para intercambiar de semaforo*/
     char buffer_recepcion[6]; /*Buffer que lee los datos desde la SHMEM*/
-    int  paquetes_erroneos = 0;
+    int paquetes_erroneos = 0;
     char buff_aux[128];
 
     typedef enum
@@ -76,11 +77,11 @@ int main()
         Acierto,
         Falla
     } txState;
-    txState TX_STATE=Acierto;
+    txState TX_STATE = Acierto;
 
     time_t timestamp;
 
-    FILE* file_error_log;
+    FILE *file_error_log;
 
     int sem_set_id;   /*ID del semaforo*/
     struct sembuf sb; /*Estructura para crear un array de semaforos*/
@@ -103,7 +104,6 @@ int main()
     muere_hijo.sa_flags = 0;
     sigemptyset(&muere_hijo.sa_mask);
     sigaction(SIGCHLD, &muere_hijo, NULL);
-
 
     url = get_url("cloud_cfg.json");
 
@@ -189,102 +189,99 @@ int main()
         printf("[PROXY]: Lectura de temperatura %s\n", buffer_recepcion);
         timestamp = time(NULL);
 
-        if (transmision_http(buffer_recepcion,timestamp, url) != 0)
+        if (transmision_http(buffer_recepcion, timestamp, url) != 0)
         {
-            TX_STATE=Falla;
+            TX_STATE = Falla;
             paquetes_erroneos++;
-            if(MEF_STATE==Correcto)
+            if (MEF_STATE == Correcto)
             {
-                MEF_STATE=Primera_Falla;
+                MEF_STATE = Primera_Falla;
             }
         }
         else
         {
-            TX_STATE=Acierto;
+            TX_STATE = Acierto;
         }
 
         // Maquina de Estados
         switch (MEF_STATE)
         {
-            case Primera_Falla:
+        case Primera_Falla:
+        {
+            // Creo el archivo de errores
+            file_error_log = fopen("error_send.json", "w+");
+            if (file_error_log == NULL)
             {
-                
-                //Creo el archivo de errores
-                file_error_log=fopen("error_send.json","w+");
-                if(file_error_log == NULL)
-                {
-                    bucle_activado=0;
-                }
-                fflush(file_error_log);
-                fprintf(file_error_log,"{\n"
-                                        "\t\"medicionN%d\":\n"
-                                        "\t\t{\"valor\":%s,\"timestamp\":%ld}", 
-                        paquetes_erroneos,buffer_recepcion,timestamp);
+                bucle_activado = 0;
+            }
+            fflush(file_error_log);
+            fprintf(file_error_log, "{\n"
+                                    "\t\"medicionN%d\":\n"
+                                    "\t\t{\"valor\":%s,\"timestamp\":%ld}",
+                    paquetes_erroneos, buffer_recepcion, timestamp);
+            fclose(file_error_log);
+            MEF_STATE = Erroneo;
+            break;
+        }
+        case Correcto:
+        {
+            if (TX_STATE == Acierto)
+            {
+                MEF_STATE = Correcto;
+            }
+            else
+            {
+                MEF_STATE = Primera_Falla;
+            }
+            break;
+        }
+        case Intento_Corregir:
+        {
+            file_error_log = fopen("error_send.json", "rw+");
+            fseek(file_error_log, 0, SEEK_END);
+            fprintf(file_error_log, "\n}");
+            fclose(file_error_log);
+
+            if (intenta_nuevamente_http(url) == 0)
+            {
+                MEF_STATE = Correcto;
+                paquetes_erroneos = 0;
+            }
+            else
+            {
+                // retrocedo el cambio
+                file_error_log = fopen("error_send.json", "rw+");
+                fseek(file_error_log, -2, SEEK_END);
+                fprintf(file_error_log, "  ");
                 fclose(file_error_log);
-                MEF_STATE=Erroneo;
-                break;
-            }
-            case Correcto:
-            {
-
-                if(TX_STATE == Acierto)
-                {
-                    MEF_STATE=Correcto;
-                }
-                else
-                {
-                    MEF_STATE=Primera_Falla;
-                }
-                break;
-            }
-            case Intento_Corregir:
-            {
-                file_error_log=fopen("error_send.json","rw+");
-                fseek(file_error_log,0,SEEK_END);
-                fprintf(file_error_log,"\n}");
-                fclose(file_error_log);
-
-                if(intenta_nuevamente_http(url)==0)
-                {
-                    MEF_STATE=Correcto;
-                    paquetes_erroneos=0;
-                }
-                else
-                {
-                    //retrocedo el cambio
-                    file_error_log=fopen("error_send.json","rw+");
-                    fseek(file_error_log,-2,SEEK_END);
-                    fprintf(file_error_log,"  ");
-                    fclose(file_error_log);
-                    MEF_STATE=Erroneo;
-                }    
-                break;
-            }
-            case Erroneo:
-            {
-                int cantidad;
-                if(TX_STATE==Falla)
-                {
-                    file_error_log=fopen("error_send.json","rw+");
-                    fseek(file_error_log,0,SEEK_END);
-                    fprintf(file_error_log,",\n"
-                                           "\t\"medicionN%d\":\n"
-                                           "\t\t{\"valor\":%s,\"timestamp\":%ld}", 
-                        paquetes_erroneos,buffer_recepcion,timestamp);
-                    fclose(file_error_log);
-                }
-                else
-                {
-                    MEF_STATE=Intento_Corregir;
-                }
-                break;
-            }
-
-            default:
-            {
                 MEF_STATE = Erroneo;
-                break;
             }
+            break;
+        }
+        case Erroneo:
+        {
+            int cantidad;
+            if (TX_STATE == Falla)
+            {
+                file_error_log = fopen("error_send.json", "rw+");
+                fseek(file_error_log, 0, SEEK_END);
+                fprintf(file_error_log, ",\n"
+                                        "\t\"medicionN%d\":\n"
+                                        "\t\t{\"valor\":%s,\"timestamp\":%ld}",
+                        paquetes_erroneos, buffer_recepcion, timestamp);
+                fclose(file_error_log);
+            }
+            else
+            {
+                MEF_STATE = Intento_Corregir;
+            }
+            break;
+        }
+        default:
+        {
+            MEF_STATE = Erroneo;
+            break;
+        }
         }
 
         if (paquetes_erroneos == 20)
@@ -307,13 +304,10 @@ int main()
         else
             semaforo_actual = 0;
     }
-    file_error_log=fopen("error_send.json","rw+");
-    fseek(file_error_log,0,SEEK_END);
-    fprintf(file_error_log,"\n}");
+    file_error_log = fopen("error_send.json", "rw+");
+    fseek(file_error_log, 0, SEEK_END);
+    fprintf(file_error_log, "\n}");
     fclose(file_error_log);
-
-
-
 
     /* Remuevo la SHMEM de nuestro espacio de direccionamiento*/
     if (shmdt(shm_addr) == -1)
@@ -473,12 +467,10 @@ int post_control(void)
     return 0;
 }
 
-void post_http(char *medicion,time_t timestamp , char *url)
+void post_http(char *medicion, time_t timestamp, char *url)
 {
     char buffer_aux[128];
-    CURL *curl;
-    CURLcode res;
-    int err, file;
+    int file;
     int PID;
     PID = fork();
 
@@ -497,34 +489,10 @@ void post_http(char *medicion,time_t timestamp , char *url)
     }
     dup2(file, STDOUT_FILENO);
 
-    memset(buffer_aux,'\0',128);
-    sprintf(buffer_aux,"{ \"medicion\": { \"valor\": %s, \"timestamp\": %ld} }",medicion,timestamp);
+    memset(buffer_aux, '\0', 128);
+    sprintf(buffer_aux, "{ \"medicion\": { \"valor\": %s, \"timestamp\": %ld} }", medicion, timestamp);
 
-    /* In windows, this will init the winsock stuff */
-    curl_global_init(CURL_GLOBAL_ALL);
-
-    /* get a curl handle */
-    curl = curl_easy_init();
-    if (curl)
-    {
-        /* First set the URL that is about to receive our POST. This URL can
-           just as well be a https:// URL if that is what should receive the
-           data. */
-        curl_easy_setopt(curl, CURLOPT_URL, url);
-        /* Now specify the POST data */
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, buffer_aux);
-
-        /* Perform the request, res will get the return code */
-        res = curl_easy_perform(curl);
-        /* Check for errors */
-        if (res != CURLE_OK)
-            printf("FALLA: curl_easy_perform() : %s\n",
-                   curl_easy_strerror(res));
-
-        /* always cleanup */
-        curl_easy_cleanup(curl);
-    }
-    curl_global_cleanup();
+    curl_envio_http(buffer_aux, url);
 }
 
 volatile int bucle_temperatura = 1;
@@ -691,7 +659,7 @@ void productor_temperatura(int sem_set_id, char *shm_addr, struct sembuf sb, uni
     free(buffer);
 }
 
-int transmision_http(char *medicion,time_t timestamp, char *url)
+int transmision_http(char *medicion, time_t timestamp, char *url)
 {
     int PID_2;
 
@@ -700,7 +668,7 @@ int transmision_http(char *medicion,time_t timestamp, char *url)
     if (PID_2 == 0)
     {
         signal(SIGINT, SIG_IGN);
-        post_http(medicion,timestamp , url);
+        post_http(medicion, timestamp, url);
         exit(1);
     }
     wait(NULL);
@@ -713,16 +681,16 @@ int transmision_http(char *medicion,time_t timestamp, char *url)
     return 0;
 }
 
-int intenta_nuevamente_http(char* url)
+int intenta_nuevamente_http(char *url)
 {
-    char* buff_tx;
+    char *buff_tx;
     char ch_aux;
     int cantidad_caracteres;
-    FILE* archivo_error;
+    FILE *archivo_error;
 
-    archivo_error=fopen("error_send.json","r");
+    archivo_error = fopen("error_send.json", "r");
 
-    if(archivo_error == NULL)
+    if (archivo_error == NULL)
     {
         printf("Error al abrir el archivo");
         return -1;
@@ -730,24 +698,24 @@ int intenta_nuevamente_http(char* url)
 
     do
     {
-        ch_aux=fgetc(archivo_error);
+        ch_aux = fgetc(archivo_error);
         cantidad_caracteres++;
     } while (!feof(archivo_error));
     rewind(archivo_error);
 
-    buff_tx=malloc(cantidad_caracteres*sizeof(char));
-    if(buff_tx == NULL)
+    buff_tx = malloc(cantidad_caracteres * sizeof(char));
+    if (buff_tx == NULL)
     {
         printf("Error al asignar memoria dinamica\n");
         return -1;
     }
-    
-    if(fread(buff_tx,cantidad_caracteres,sizeof(char),archivo_error)<0)
-    {   
+
+    if (fread(buff_tx, cantidad_caracteres, sizeof(char), archivo_error) < 0)
+    {
         printf("Error al leer el archivo\n");
         return -1;
     }
-    if(transmision_paquete_http(buff_tx,url)!= 0)
+    if (transmision_paquete_http(buff_tx, url) != 0)
     {
         return -1;
     }
@@ -755,7 +723,7 @@ int intenta_nuevamente_http(char* url)
     return 0;
 }
 
-int transmision_paquete_http(char* buff_tx,char* url)
+int transmision_paquete_http(char *buff_tx, char *url)
 {
     int PID_2;
     PID_2 = fork();
@@ -776,11 +744,9 @@ int transmision_paquete_http(char* buff_tx,char* url)
     return 0;
 }
 
-void post_paquete_http(char* buff_tx, char* url)
+void post_paquete_http(char *buff_tx, char *url)
 {
-    CURL *curl;
-    CURLcode res;
-    int err, file;
+    int file;
     int PID;
     PID = fork();
 
@@ -799,6 +765,13 @@ void post_paquete_http(char* buff_tx, char* url)
     }
     dup2(file, STDOUT_FILENO);
 
+    curl_envio_http(buff_tx, url);
+}
+
+void curl_envio_http(char *buff_tx, char *url)
+{
+    CURL *curl;
+    CURLcode res;
     /* In windows, this will init the winsock stuff */
     curl_global_init(CURL_GLOBAL_ALL);
 
@@ -824,5 +797,4 @@ void post_paquete_http(char* buff_tx, char* url)
         curl_easy_cleanup(curl);
     }
     curl_global_cleanup();
-
 }
