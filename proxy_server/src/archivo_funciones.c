@@ -4,17 +4,16 @@
  * @brief Funciones de utilidad para manejar archivos
  * @version 0.1
  * @date 07-12-2021
- * 
+ *
  * @copyright Copyright (c) 2021
- * 
+ *
  */
 
 #include "../inc/main.h"
 
-
 /**
  * @brief Funcion a la cual se le pasa la ruta de un archivo y la misma se lee en formato .json
- * 
+ *
  * @param ruta direccion a donde se encuentra el cloud server
  * @return char* url en donde hacer los post
  */
@@ -25,10 +24,9 @@ char *obtener_url(char *ruta)
     struct json_object *principal_cfg = NULL; /*Variables auxiliares para recorrer el .json*/
     struct json_object *url_json = NULL;
 
+    buffer_cfg = obtener_string_de_file(ruta);
 
-    buffer_cfg=obtener_string_de_file(ruta);
-
-    if(buffer_cfg == NULL)
+    if (buffer_cfg == NULL)
     {
         return NULL;
     }
@@ -64,21 +62,21 @@ char *obtener_url(char *ruta)
 
 /**
  * @brief Funcion la cual levanta un archivo y lo copia a un string
- * 
+ *
  * @param ruta Ruta del archivo a levantar
  * @return char* String contenedora de la informacion del archivo
  */
-char* obtener_string_de_file(char* ruta)
+char *obtener_string_de_file(char *ruta)
 {
-    FILE* file_pointer;
+    FILE *file_pointer;
     char ch_aux;
     int cantidad_caracteres;
-    char* buffer_return;
+    char *buffer_return;
 
     file_pointer = fopen(ruta, "r");
     if (file_pointer == NULL)
     {
-        printf("Error al abrir el archivo %s\n",ruta);
+        printf("Error al abrir el archivo %s\n", ruta);
         return NULL;
     }
 
@@ -99,12 +97,12 @@ char* obtener_string_de_file(char* ruta)
 
     rewind(file_pointer);
 
-    if (fread(buffer_return, cantidad_caracteres,sizeof(char), file_pointer) < 0)
+    if (fread(buffer_return, cantidad_caracteres, sizeof(char), file_pointer) < 0)
     {
-        printf("Error al leer el archivo %s\n",ruta);
+        printf("Error al leer el archivo %s\n", ruta);
         fclose(file_pointer);
         return NULL;
     }
 
-    return buffer_return;   
+    return buffer_return;
 }

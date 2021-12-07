@@ -2,7 +2,7 @@
    "BAT0-acpi-0":{
       "Adapter": "ACPI interface",
       "in0":{
-         "in0_input": 17.227
+         "in0_input": 17.226
       },
       "curr1":{
          "curr1_input": 0.000
@@ -11,19 +11,19 @@
    "coretemp-isa-0000":{
       "Adapter": "ISA adapter",
       "Package id 0":{
-         "temp1_input": 53.000,
+         "temp1_input": 57.000,
          "temp1_max": 87.000,
          "temp1_crit": 105.000,
          "temp1_crit_alarm": 0.000
       },
       "Core 0":{
-         "temp2_input": 52.000,
+         "temp2_input": 57.000,
          "temp2_max": 87.000,
          "temp2_crit": 105.000,
          "temp2_crit_alarm": 0.000
       },
       "Core 1":{
-         "temp3_input": 52.000,
+         "temp3_input": 58.000,
          "temp3_max": 87.000,
          "temp3_crit": 105.000,
          "temp3_crit_alarm": 0.000
@@ -32,7 +32,7 @@
    "acpitz-acpi-0":{
       "Adapter": "ACPI interface",
       "temp1":{
-         "temp1_input": 52.000,
+         "temp1_input": 56.000,
          "temp1_crit": 98.000
       },
       "temp2":{

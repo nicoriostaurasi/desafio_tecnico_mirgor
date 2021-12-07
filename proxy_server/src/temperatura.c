@@ -4,9 +4,9 @@
  * @brief Proceso Hijo que se encarga de levantar las mediciones de temperatura
  * @version 0.1
  * @date 07-12-2021
- * 
+ *
  * @copyright Copyright (c) 2021
- * 
+ *
  */
 
 #include "../inc/main.h"
@@ -31,15 +31,15 @@ void productor_temperatura(int sem_set_id, char *shm_addr, struct sembuf sb, uni
     struct json_object *core_temp = NULL;
     struct json_object *pack_id = NULL;
     struct json_object *temp_1 = NULL;
-    char temperatura_vector[6];           /*Vector que almacena la temperatura leida del .json*/
+    char temperatura_vector[6]; /*Vector que almacena la temperatura leida del .json*/
 
-    struct sigaction muerte;              /*Modifico el handler de SIGUSR2*/
+    struct sigaction muerte; /*Modifico el handler de SIGUSR2*/
     muerte.sa_handler = handler_productor_sigusr2;
     muerte.sa_flags = 0;
     sigemptyset(&muerte.sa_mask);
     sigaction(SIGUSR2, &muerte, NULL);
 
-    signal(SIGINT, SIG_DFL);              /*Ignoro las señales de SIGCHLD y SIGINT tiene su handler por defecto*/
+    signal(SIGINT, SIG_DFL); /*Ignoro las señales de SIGCHLD y SIGINT tiene su handler por defecto*/
     signal(SIGCHLD, SIG_IGN);
 
     printf("Soy el Proceso Colector de temperatura mi PID es %d\n", getpid());
@@ -83,11 +83,11 @@ void productor_temperatura(int sem_set_id, char *shm_addr, struct sembuf sb, uni
 
         /*Me encargo de parsear el archivo en formato .json*/
 
-        buffer=obtener_string_de_file(Ruta_Temperatura);
+        buffer = obtener_string_de_file(Ruta_Temperatura);
 
-        if(buffer==NULL)
+        if (buffer == NULL)
         {
-            bucle_temperatura=0;
+            bucle_temperatura = 0;
         }
 
         principal = json_tokener_parse(buffer);

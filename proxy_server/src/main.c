@@ -4,25 +4,24 @@
  * @brief Archivo principal, contiene el proceso proxy
  * @version 0.1
  * @date 07-12-2021
- * 
+ *
  * @copyright Copyright (c) 2021
- * 
+ *
  */
 
 #include "../inc/main.h"
 
-
-//Variable de control para el bucle
+// Variable de control para el bucle
 int bucle_activado = 1;
 
-//Handler de Control+C
+// Handler de Control+C
 void handle_sigkill(int signal)
 {
     bucle_activado = 0;
     printf("Ctrl C por consola\n");
 }
 
-//Handler de Sigchild
+// Handler de Sigchild
 void handle_sigchild(int s)
 {
     int pidstatus; /*Variable que revisa un hijo finalizo ejecución*/
@@ -39,17 +38,16 @@ void handle_sigchild(int s)
     return;
 }
 
-
 int main()
 {
-    int bucle_activado = 1;     /*Variable que gobierna el bucle principal*/
-    int PID;                    /*PID que identifica nuestro hijo*/
-    int semaforo_actual = 0;    /*Variable auxiliar para intercambiar de semaforo*/
-    char buffer_recepcion[6];   /*Buffer que lee los datos desde la SHMEM*/
-    int paquetes_erroneos = 0;  /*Cantidad de paquetes erroneos*/
-    int aux;                    /*Variable auxiliar*/
+    int bucle_activado = 1;    /*Variable que gobierna el bucle principal*/
+    int PID;                   /*PID que identifica nuestro hijo*/
+    int semaforo_actual = 0;   /*Variable auxiliar para intercambiar de semaforo*/
+    char buffer_recepcion[6];  /*Buffer que lee los datos desde la SHMEM*/
+    int paquetes_erroneos = 0; /*Cantidad de paquetes erroneos*/
+    int aux;                   /*Variable auxiliar*/
 
-    typedef enum                /*Variable de la Maquina de Estados*/
+    typedef enum /*Variable de la Maquina de Estados*/
     {
         Primera_Falla,
         Correcto,
@@ -58,40 +56,40 @@ int main()
     } tState;
     tState MEF_STATE = Correcto;
 
-    typedef enum                /*Variable de control para el envio*/
+    typedef enum /*Variable de control para el envio*/
     {
         Acierto,
         Falla
     } txState;
     txState TX_STATE = Acierto;
 
-    time_t timestamp;           /*Variable para controlar el tiempo*/
+    time_t timestamp; /*Variable para controlar el tiempo*/
 
-    FILE *file_error_log;       /*File pointer para completar el archivo de paquetes no enviados*/
+    FILE *file_error_log; /*File pointer para completar el archivo de paquetes no enviados*/
 
-    int sem_set_id;             /*ID del semaforo*/
-    struct sembuf sb;           /*Estructura para crear un array de semaforos*/
-    union smun arg;             /*Para comandar la toma de semaforo por parte del productor*/
+    int sem_set_id;   /*ID del semaforo*/
+    struct sembuf sb; /*Estructura para crear un array de semaforos*/
+    union smun arg;   /*Para comandar la toma de semaforo por parte del productor*/
 
-    int shm_id;                 /*ID de la Shared Memory*/
-    char *shm_addr;             /*Puntero a la Shared Memory*/
-    struct shmid_ds shm_desc;   /*Struct para control de la Shared Memory*/
+    int shm_id;               /*ID de la Shared Memory*/
+    char *shm_addr;           /*Puntero a la Shared Memory*/
+    struct shmid_ds shm_desc; /*Struct para control de la Shared Memory*/
 
-    char *url;                  /*URL del cloud server*/
+    char *url; /*URL del cloud server*/
 
-    struct sigaction muerte;                    /*Reasigno el handler de SIGINT*/
+    struct sigaction muerte; /*Reasigno el handler de SIGINT*/
     muerte.sa_handler = handle_sigkill;
     muerte.sa_flags = 0;
     sigemptyset(&muerte.sa_mask);
     sigaction(SIGINT, &muerte, NULL);
 
-    struct sigaction muere_hijo;                /*Reasigno el handler de SIGCHLD*/
+    struct sigaction muere_hijo; /*Reasigno el handler de SIGCHLD*/
     muere_hijo.sa_handler = handle_sigchild;
     muere_hijo.sa_flags = 0;
     sigemptyset(&muere_hijo.sa_mask);
     sigaction(SIGCHLD, &muere_hijo, NULL);
 
-    url = obtener_url(Ruta_Archivo_CFG);        /*Obtengo la URL desde el archivo de configuracion*/
+    url = obtener_url(Ruta_Archivo_CFG); /*Obtengo la URL desde el archivo de configuracion*/
 
     if (url == NULL)
     {
@@ -137,7 +135,7 @@ int main()
     sb.sem_op = 1;
     sb.sem_flg = 0;
     arg.val = 1;
-    
+
     /*Libero los semaforos*/
     for (sb.sem_num = 0; sb.sem_num < 2; sb.sem_num++)
     {
@@ -169,7 +167,7 @@ int main()
     while (bucle_activado)
     {
         /*Tomo el Semaforo y me quedo durmiendo hasta que se libere*/
-        aux=bucle_activado;
+        aux = bucle_activado;
         sb.sem_op = -1;
         sb.sem_num = semaforo_actual;
         if (semop(sem_set_id, &sb, 1) == -1)
@@ -220,7 +218,7 @@ int main()
             break;
         }
         case Correcto:
-        {   
+        {
             /*Detecto la primer falla y me voy al estado correspondiente*/
             if (TX_STATE == Acierto)
             {
@@ -336,7 +334,7 @@ int main()
         printf("Error al desalojar el semaforo\n");
     }
     printf("Liberando recursos\n");
-    /*Le aviso a mi hijo que debe terminar su ejecucion para tener una salida 
+    /*Le aviso a mi hijo que debe terminar su ejecucion para tener una salida
     y cirre de recursos agradable.*/
 
     kill(PID, SIGUSR2);

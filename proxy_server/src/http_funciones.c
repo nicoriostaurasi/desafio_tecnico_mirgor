@@ -4,16 +4,16 @@
  * @brief Contiene las funciones HTTP post de paquete y de medicion
  * @version 0.1
  * @date 07-12-2021
- * 
+ *
  * @copyright Copyright (c) 2021
- * 
+ *
  */
 
 #include "../inc/main.h"
 
 /**
  * @brief funcion que se encarga de chequear la salida por consola luego de hacer un post HTTP
- * 
+ *
  * @return 0: Exito, -1: Error
  */
 int post_control(void)
@@ -22,13 +22,13 @@ int post_control(void)
     struct json_object *status = NULL;
     char *buffer_control;
 
-    buffer_control=obtener_string_de_file(Ruta_LOG_POST);
-    
-    if(buffer_control == NULL)
+    buffer_control = obtener_string_de_file(Ruta_LOG_POST);
+
+    if (buffer_control == NULL)
     {
         return -1;
     }
-    
+
     principal = json_tokener_parse(buffer_control);
 
     if (principal == NULL)
@@ -57,7 +57,7 @@ int post_control(void)
 
 /**
  * @brief Post simple de una sola medicion HTTP
- * 
+ *
  * @param medicion valor medido
  * @param timestamp unidad temporal
  * @param url direccion a donde se encuentra el cloud server
@@ -90,10 +90,9 @@ void post_http(char *medicion, time_t timestamp, char *url)
     curl_envio_http(buffer_aux, url);
 }
 
-
 /**
  * @brief Se encarga de transmitir una unica medicion
- * 
+ *
  * @param medicion valor medido
  * @param timestamp unidad temporal
  * @param url direccion a donde se encuentra el cloud server
@@ -123,7 +122,7 @@ int transmision_http(char *medicion, time_t timestamp, char *url)
 
 /**
  * @brief Funcion que se encarga de levantar el archivo de errores y envia todo como un solo paquete
- * 
+ *
  * @param url direccion a donde se encuentra el cloud server
  * @return int 0: Exito, -1: Error
  */
@@ -131,9 +130,9 @@ int intenta_nuevamente_http(char *url)
 {
     char *buff_tx;
 
-    buff_tx=obtener_string_de_file(Ruta_Archivo_Error);
+    buff_tx = obtener_string_de_file(Ruta_Archivo_Error);
 
-    if(buff_tx == NULL)
+    if (buff_tx == NULL)
     {
         return -1;
     }
@@ -148,7 +147,7 @@ int intenta_nuevamente_http(char *url)
 
 /**
  * @brief Funcion que recibe el buffer a enviar como paquete y controla que llego correctamente
- * 
+ *
  * @param buff_tx string que contiene el texto del archivo
  * @param url direccion a donde se encuentra el cloud server
  * @return int 0: Exito, -1: Error
@@ -176,9 +175,9 @@ int transmision_paquete_http(char *buff_tx, char *url)
 
 /**
  * @brief Proceso que va a enviar el paquete
- * 
+ *
  * @param buff_tx contenido a enviar
- * @param url direccion a donde se encuentra el cloud server 
+ * @param url direccion a donde se encuentra el cloud server
  */
 void post_paquete_http(char *buff_tx, char *url)
 {

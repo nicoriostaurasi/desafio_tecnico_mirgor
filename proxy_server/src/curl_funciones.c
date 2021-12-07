@@ -4,16 +4,16 @@
  * @brief Archivo que contiene las funciones de CURL
  * @version 0.1
  * @date 07-12-2021
- * 
+ *
  * @copyright Copyright (c) 2021
- * 
+ *
  */
 
 #include "../inc/main.h"
 
 /**
  * @brief Funcion ejemplo por parte de la libreria, la misma recibe un string y lo envia mediante una url pasada por parametro
- * 
+ *
  * @param buff_tx informacion a transmitir
  * @param url direccion a donde se encuentra el cloud server
  */
