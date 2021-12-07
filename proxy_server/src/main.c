@@ -44,16 +44,24 @@ void handle_sigchild(int s)
     return;
 }
 
-char *obtener_url(char *ruta);
-void post_http(char *medicion, time_t timestamp, char *url);
-int post_control(void);
+//------ main y procesos de alta
 void productor_temperatura(int sem_set_id, char *shm_addr, struct sembuf sb, union smun arg);
-int transmision_http(char *medicion, time_t timestamp, char *url);
-int intenta_nuevamente_http(char *url);
-int transmision_paquete_http(char *buff_tx, char *url);
-void post_paquete_http(char *buff_tx, char *url);
-void curl_envio_http(char *buff_tx, char *url);
+
+//----- manejo de archivos
+char *obtener_url(char *ruta);
 char* obtener_string_de_file(char* ruta);
+
+//----- curl
+void curl_envio_http(char *buff_tx, char *url);
+
+
+//----- http
+int transmision_http(char *medicion, time_t timestamp, char *url);
+int transmision_paquete_http(char *buff_tx, char *url);
+int post_control(void);
+int intenta_nuevamente_http(char *url);
+void post_paquete_http(char *buff_tx, char *url);
+void post_http(char *medicion, time_t timestamp, char *url);
 
 int main()
 {
@@ -62,7 +70,6 @@ int main()
     int semaforo_actual = 0;  /*Variable auxiliar para intercambiar de semaforo*/
     char buffer_recepcion[6]; /*Buffer que lee los datos desde la SHMEM*/
     int paquetes_erroneos = 0;
-    char buff_aux[128];
 
     typedef enum
     {
@@ -334,11 +341,8 @@ int main()
 
 char *obtener_url(char *ruta)
 {
-    FILE *fp_cfg;
-    char ch_cfg;
     char *buffer_cfg;
     char *buffer_return;
-    int c_cfg;
     struct json_object *principal_cfg = NULL; /*Variables auxiliares para recorrer el .json*/
     struct json_object *url_json = NULL;
 
@@ -383,10 +387,7 @@ int post_control(void)
 {
     struct json_object *principal = NULL;
     struct json_object *status = NULL;
-    FILE *colector_salida;
     char *buffer_control;
-    char ch;
-    int c;
 
     buffer_control=obtener_string_de_file("output_post");
     
