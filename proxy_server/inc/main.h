@@ -1,3 +1,14 @@
+/**
+ * @file main.h
+ * @author Nicolas Rios Taurasi (nicoriostaurasi@frba.utn.edu.ar)
+ * @brief Principales bibliotecas a utilizar
+ * @version 0.1
+ * @date 07-12-2021
+ * 
+ * @copyright Copyright (c) 2021
+ * 
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -16,6 +27,7 @@
 #include "http_funciones.h"
 
 #define SEM_ID 250 /* ID del semaforo */
+#define MAX_ERRORS 20
 
 typedef union smun
 {

@@ -1,5 +1,23 @@
+/**
+ * @file archivo_funciones.c
+ * @author Nicolas Rios Taurasi (nicoriostaurasi@frba.utn.edu.ar)
+ * @brief Funciones de utilidad para manejar archivos
+ * @version 0.1
+ * @date 07-12-2021
+ * 
+ * @copyright Copyright (c) 2021
+ * 
+ */
+
 #include "../inc/main.h"
 
+
+/**
+ * @brief Funcion a la cual se le pasa la ruta de un archivo y la misma se lee en formato .json
+ * 
+ * @param ruta direccion a donde se encuentra el cloud server
+ * @return char* url en donde hacer los post
+ */
 char *obtener_url(char *ruta)
 {
     char *buffer_cfg;
@@ -44,6 +62,12 @@ char *obtener_url(char *ruta)
     return buffer_return;
 }
 
+/**
+ * @brief Funcion la cual levanta un archivo y lo copia a un string
+ * 
+ * @param ruta Ruta del archivo a levantar
+ * @return char* String contenedora de la informacion del archivo
+ */
 char* obtener_string_de_file(char* ruta)
 {
     FILE* file_pointer;

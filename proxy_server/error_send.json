@@ -1,10 +1,42 @@
 {
 	"medicionN1":
-		{"valor":60.000,"timestamp":1638849977},
+		{"valor":58.000,"timestamp":1638853667},
 	"medicionN2":
-		{"valor":57.000,"timestamp":1638849978},
+		{"valor":55.000,"timestamp":1638853668},
 	"medicionN3":
-		{"valor":59.000,"timestamp":1638849979},
+		{"valor":55.000,"timestamp":1638853668},
 	"medicionN4":
-		{"valor":60.000,"timestamp":1638849979}
+		{"valor":55.000,"timestamp":1638853669},
+	"medicionN5":
+		{"valor":55.000,"timestamp":1638853669},
+	"medicionN6":
+		{"valor":55.000,"timestamp":1638853670},
+	"medicionN7":
+		{"valor":55.000,"timestamp":1638853670},
+	"medicionN8":
+		{"valor":55.000,"timestamp":1638853670},
+	"medicionN9":
+		{"valor":55.000,"timestamp":1638853671},
+	"medicionN10":
+		{"valor":55.000,"timestamp":1638853671},
+	"medicionN11":
+		{"valor":55.000,"timestamp":1638853671},
+	"medicionN12":
+		{"valor":55.000,"timestamp":1638853671},
+	"medicionN13":
+		{"valor":55.000,"timestamp":1638853671},
+	"medicionN14":
+		{"valor":55.000,"timestamp":1638853671},
+	"medicionN15":
+		{"valor":55.000,"timestamp":1638853671},
+	"medicionN16":
+		{"valor":55.000,"timestamp":1638853671},
+	"medicionN17":
+		{"valor":55.000,"timestamp":1638853672},
+	"medicionN18":
+		{"valor":55.000,"timestamp":1638853672},
+	"medicionN19":
+		{"valor":55.000,"timestamp":1638853672},
+	"medicionN20":
+		{"valor":55.000,"timestamp":1638853672}
 }

@@ -1,7 +1,20 @@
+/**
+ * @file temperatura.c
+ * @author Nicolas Rios Taurasi (nicoriostaurasi@frba.utn.edu.ar)
+ * @brief Proceso Hijo que se encarga de levantar las mediciones de temperatura
+ * @version 0.1
+ * @date 07-12-2021
+ * 
+ * @copyright Copyright (c) 2021
+ * 
+ */
+
 #include "../inc/main.h"
 
+/*Variable para el superlazo*/
 volatile int bucle_temperatura = 1;
 
+/*Handler de SIGUSR2*/
 void handler_productor_sigusr2(int signal)
 {
     bucle_temperatura = 0;
@@ -18,17 +31,15 @@ void productor_temperatura(int sem_set_id, char *shm_addr, struct sembuf sb, uni
     struct json_object *core_temp = NULL;
     struct json_object *pack_id = NULL;
     struct json_object *temp_1 = NULL;
-    int nbytes = 0;             /*Return del fread*/
-    char temperatura_vector[6]; /*Vector que almacena la temperatura leida del .json*/
+    char temperatura_vector[6];           /*Vector que almacena la temperatura leida del .json*/
 
-    // handler para recargar el handler
-    struct sigaction muerte;
+    struct sigaction muerte;              /*Modifico el handler de SIGUSR2*/
     muerte.sa_handler = handler_productor_sigusr2;
     muerte.sa_flags = 0;
     sigemptyset(&muerte.sa_mask);
     sigaction(SIGUSR2, &muerte, NULL);
 
-    signal(SIGINT, SIG_DFL);
+    signal(SIGINT, SIG_DFL);              /*Ignoro las señales de SIGCHLD y SIGINT tiene su handler por defecto*/
     signal(SIGCHLD, SIG_IGN);
 
     printf("Soy el Proceso Colector de temperatura mi PID es %d\n", getpid());
@@ -42,6 +53,7 @@ void productor_temperatura(int sem_set_id, char *shm_addr, struct sembuf sb, uni
         pid = fork();
         if (pid == 0)
         {
+            /*Obtengo un hijo en el cual imprimo la salida del comando de temperatura*/
             int err, file;
             file = open("temperatura.json", O_WRONLY | O_CREAT, 0777);
             if (file == -1)
@@ -68,6 +80,8 @@ void productor_temperatura(int sem_set_id, char *shm_addr, struct sembuf sb, uni
         }
 
         wait(NULL);
+
+        /*Me encargo de parsear el archivo en formato .json*/
 
         buffer=obtener_string_de_file("temperatura.json");
 
@@ -107,13 +121,11 @@ void productor_temperatura(int sem_set_id, char *shm_addr, struct sembuf sb, uni
             bucle_temperatura = 0;
             printf("Error al parsear dentro de \"Package id 0\"\n");
         }
-
+        /*Escribo en la SHMEM la informacion*/
         sprintf(temperatura_vector, "%s", json_object_get_string(temp_1));
-
-        // cambio de semaforo
         memcpy(shm_addr, temperatura_vector, sizeof(temperatura_vector));
         sleep(1);
-        // Libero el semaforo
+        /*Libero el semaforo*/
         arg.val = 1;
         if (semctl(sem_set_id, sb.sem_num, SETVAL, arg) != 0)
         {
@@ -121,13 +133,13 @@ void productor_temperatura(int sem_set_id, char *shm_addr, struct sembuf sb, uni
             printf("Error al liberar el semaforo\n");
         }
 
-        // Toggleo el numero de semaforo
+        /*Intercambio el semaforo*/
         if (sb.sem_num == 0)
             sb.sem_num = 1;
         else
             sb.sem_num = 0;
 
-        // Tomo el otro semaforo
+        /*Tomo el otro semaforo*/
         arg.val = 0;
         if (semctl(sem_set_id, sb.sem_num, SETVAL, arg) != 0)
         {
