@@ -44,7 +44,7 @@ void handle_sigchild(int s)
     return;
 }
 
-char *get_url(char *ruta);
+char *obtener_url(char *ruta);
 void post_http(char *medicion, time_t timestamp, char *url);
 int post_control(void);
 void productor_temperatura(int sem_set_id, char *shm_addr, struct sembuf sb, union smun arg);
@@ -53,6 +53,7 @@ int intenta_nuevamente_http(char *url);
 int transmision_paquete_http(char *buff_tx, char *url);
 void post_paquete_http(char *buff_tx, char *url);
 void curl_envio_http(char *buff_tx, char *url);
+char* obtener_string_de_file(char* ruta);
 
 int main()
 {
@@ -105,7 +106,7 @@ int main()
     sigemptyset(&muere_hijo.sa_mask);
     sigaction(SIGCHLD, &muere_hijo, NULL);
 
-    url = get_url("cloud_cfg.json");
+    url = obtener_url("cloud_cfg.json");
 
     if (url == NULL)
     {
@@ -331,10 +332,9 @@ int main()
     return 0;
 }
 
-char *get_url(char *ruta)
+char *obtener_url(char *ruta)
 {
     FILE *fp_cfg;
-    fp_cfg = fopen(ruta, "r");
     char ch_cfg;
     char *buffer_cfg;
     char *buffer_return;
@@ -342,35 +342,13 @@ char *get_url(char *ruta)
     struct json_object *principal_cfg = NULL; /*Variables auxiliares para recorrer el .json*/
     struct json_object *url_json = NULL;
 
-    if (fp_cfg == NULL)
+
+    buffer_cfg=obtener_string_de_file(ruta);
+
+    if(buffer_cfg == NULL)
     {
-        printf("Error al abrir el archivo cloud_cfg.json\n");
         return NULL;
     }
-
-    do
-    {
-        ch_cfg = fgetc(fp_cfg);
-        c_cfg++;
-    } while (!feof(fp_cfg));
-
-    buffer_cfg = malloc(c_cfg);
-
-    if (buffer_cfg == NULL)
-    {
-        printf("Error al asignar memoria dinamica\n");
-        return NULL;
-    }
-
-    rewind(fp_cfg);
-
-    if (fread(buffer_cfg, c_cfg, 1, fp_cfg) < 0)
-    {
-        printf("Error al leer el archivo\n");
-        return NULL;
-    }
-
-    fclose(fp_cfg);
 
     principal_cfg = json_tokener_parse(buffer_cfg);
 
@@ -410,38 +388,13 @@ int post_control(void)
     char ch;
     int c;
 
-    colector_salida = fopen("output_post", "r");
-
-    if (colector_salida == NULL)
+    buffer_control=obtener_string_de_file("output_post");
+    
+    if(buffer_control == NULL)
     {
-        printf("Error al abrir el archivo\n");
         return -1;
     }
-
-    do
-    {
-        ch = fgetc(colector_salida);
-        c++;
-    } while (!feof(colector_salida));
-
-    buffer_control = malloc(c);
-
-    if (buffer_control == NULL)
-    {
-        printf("Error al asignar memoria dinamica\n");
-        return -1;
-    }
-
-    rewind(colector_salida);
-
-    if (fread(buffer_control, c, 1, colector_salida) < 0)
-    {
-        printf("Error al leer el archivo\n");
-        return -1;
-    }
-
-    fclose(colector_salida);
-
+    
     principal = json_tokener_parse(buffer_control);
 
     if (principal == NULL)
@@ -564,38 +517,12 @@ void productor_temperatura(int sem_set_id, char *shm_addr, struct sembuf sb, uni
 
         wait(NULL);
 
-        fp = fopen("temperatura.json", "r");
+        buffer=obtener_string_de_file("temperatura.json");
 
-        if (fp == NULL)
+        if(buffer==NULL)
         {
-            bucle_temperatura = 0;
-            printf("Error al abrir el archivo temperatura.json\n");
+            bucle_temperatura=0;
         }
-
-        do
-        {
-            ch = fgetc(fp);
-            c++;
-        } while (!feof(fp));
-
-        buffer = malloc(c);
-
-        if (buffer == NULL)
-        {
-            bucle_temperatura = 0;
-            printf("Error al asignar memoria dinamica\n");
-        }
-
-        rewind(fp);
-
-        nbytes = fread(buffer, c, 1, fp);
-        if (nbytes < 0)
-        {
-            bucle_temperatura = 0;
-            printf("Error al leer el archivo\n");
-        }
-
-        fclose(fp);
 
         principal = json_tokener_parse(buffer);
 
@@ -684,37 +611,14 @@ int transmision_http(char *medicion, time_t timestamp, char *url)
 int intenta_nuevamente_http(char *url)
 {
     char *buff_tx;
-    char ch_aux;
-    int cantidad_caracteres;
-    FILE *archivo_error;
 
-    archivo_error = fopen("error_send.json", "r");
+    buff_tx=obtener_string_de_file("error_send.json");
 
-    if (archivo_error == NULL)
+    if(buff_tx == NULL)
     {
-        printf("Error al abrir el archivo");
         return -1;
     }
 
-    do
-    {
-        ch_aux = fgetc(archivo_error);
-        cantidad_caracteres++;
-    } while (!feof(archivo_error));
-    rewind(archivo_error);
-
-    buff_tx = malloc(cantidad_caracteres * sizeof(char));
-    if (buff_tx == NULL)
-    {
-        printf("Error al asignar memoria dinamica\n");
-        return -1;
-    }
-
-    if (fread(buff_tx, cantidad_caracteres, sizeof(char), archivo_error) < 0)
-    {
-        printf("Error al leer el archivo\n");
-        return -1;
-    }
     if (transmision_paquete_http(buff_tx, url) != 0)
     {
         return -1;
@@ -797,4 +701,45 @@ void curl_envio_http(char *buff_tx, char *url)
         curl_easy_cleanup(curl);
     }
     curl_global_cleanup();
+}
+
+char* obtener_string_de_file(char* ruta)
+{
+    FILE* file_pointer;
+    char ch_aux;
+    int cantidad_caracteres;
+    char* buffer_return;
+
+    file_pointer = fopen(ruta, "r");
+    if (file_pointer == NULL)
+    {
+        printf("Error al abrir el archivo %s\n",ruta);
+        return NULL;
+    }
+
+    do
+    {
+        ch_aux = fgetc(file_pointer);
+        cantidad_caracteres++;
+    } while (!feof(file_pointer));
+
+    buffer_return = malloc(cantidad_caracteres);
+
+    if (buffer_return == NULL)
+    {
+        printf("Error al asignar memoria dinamica\n");
+        fclose(file_pointer);
+        return NULL;
+    }
+
+    rewind(file_pointer);
+
+    if (fread(buffer_return, cantidad_caracteres,sizeof(char), file_pointer) < 0)
+    {
+        printf("Error al leer el archivo %s\n",ruta);
+        fclose(file_pointer);
+        return NULL;
+    }
+
+    return buffer_return;   
 }
