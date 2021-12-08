@@ -2,6 +2,7 @@
 * 
 
 # Unignore all with extensions *.c *.h *.txt y Makefile 
+!*.jpg
 !*.json
 !*.c 
 !*.h 
