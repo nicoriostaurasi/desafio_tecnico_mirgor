@@ -5,7 +5,7 @@
 Se debe proponer una solución en base a un sistema embebido cuyo sistema operativo a utilizar es Linux. En el sistema hay varios procesos corriendo que se deben comunicar entre sí, e incluso consumir recursos de un sistema cloud.
 
 Diagrama en bloques propuesto:
-![alt text]( "Logo Title Text 1")
+![alt text](https://github.com/nicoriostaurasi/desafio_tecnico_mirgor/blob/main/img/diagrama_en_bloques.png?raw=true"Logo Title Text 1")
 
 El diagrama en bloques del sistema propuesto se presenta en la figura anterior. En base al mismo se pide, utilizando un lenguaje de programación con el que se sienta cómodo y que considere apropiado, y utilizando como plataforma de desarrollo una PC:
 
