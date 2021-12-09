@@ -1,12 +1,20 @@
 # Desafío Técnico 2021
 
+## Acceso Rápido del Readme
+
+  - [Introducción](#introducción)
+  - [Solución Propuesta](#solución-propuesta)
+  - [Estructura de la carpeta](#estructura-de-la-carpeta)
+  - [Acceso rapido de la carpeta](#acceso-rapido-de-la-carpeta)
+  - [Descripción de los Fuentes](#descripción-de-los-fuentes)
+
 ## Introducción
 
 Se debe proponer una solución en base a un sistema embebido cuyo sistema operativo a utilizar es Linux. En el sistema hay varios procesos corriendo que se deben comunicar entre sí, e incluso consumir recursos de un sistema cloud.
 
 Diagrama en bloques propuesto:
 
-![alt text](https://github.com/nicoriostaurasi/desafio_tecnico_mirgor/blob/main/img/diagrama_en_bloques.png?raw=true)
+![alt text](https://github.com/nicoriostaurasi/desafio_tecnico_mirgor/blob/main/img/diagrama_en_bloques.png?raw=true "Logo Title Text 1")
 
 El diagrama en bloques del sistema propuesto se presenta en la figura anterior. En base al mismo se pide, utilizando un lenguaje de programación con el que se sienta cómodo y que considere apropiado, y utilizando como plataforma de desarrollo una PC:
 
@@ -16,7 +24,7 @@ El diagrama en bloques del sistema propuesto se presenta en la figura anterior. 
 
 * **3.** En base al sistema propuesto, ¿Cómo implementaría la comunicación entre el proceso consumidor (Proxy) y el servidor cloud? Proponga un diagrama de bloques y un diagrama de secuencia del funcionamiento del proceso. 
 
-
+## Solución Propuesta
 
 ## Estructura de la carpeta
 
