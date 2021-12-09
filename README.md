@@ -25,7 +25,7 @@ El diagrama en bloques del sistema propuesto se presenta en la figura anterior. 
 
 ### Preguntas de interés en la devolución
 
-* **.**  En caso de que el sistema no tenga conectividad hacia el exterior, ¿Qué estrategia utilizaría para evitar pérdida de datos críticos? Proponga herramientas y/o estrategias que se podrían utilizar para dicho fin.
+* En caso de que el sistema no tenga conectividad hacia el exterior, ¿Qué estrategia utilizaría para evitar pérdida de datos críticos? Proponga herramientas y/o estrategias que se podrían utilizar para dicho fin.
 * **.** ¿Qué problemas encuentra en la arquitectura propuesta para el sistema? Proponga soluciones a los mismos y consecuencias de dichos cambios.
 * **.** ¿Qué cambios considera serían necesarios para adaptar la solución propuesta funcionando en una PC para que funcione en una computadora embebida (RaspberryPi, BeagleBone, etc...)
 
