@@ -26,21 +26,14 @@ El diagrama en bloques del sistema propuesto se presenta en la figura anterior. 
 
 ## Solución Propuesta
 
+
 ## Estructura de la carpeta
 
-* ***inc***: Se encuentran archivos .h con distintos defines de utilidad y funciones implementadas
+* ***proxy_server***: Se encuentran los fuentes utilizados para resolver el desafío.
+* ***img***: Se encuentran las imagenes utilizadas para documentación.
 
 ## Acceso rapido de la carpeta
 
-* [Inc](/GuiaTP_02/servidor/inc/)
+* [Proxy Server](/proxy_server/)
   
-* [Src](/GuiaTP_02/servidor/src/)
-
-* [CFG](/GuiaTP_02/servidor/cfg.txt)
-
-* [Makefile](/GuiaTP_02/servidor/Makefile)
-
-
-## Descripción de los Fuentes
-
-* **driver_handler.c**: Contiene la función que ejecuta el proceso colector de datos [Fuente](src/driver_handler.c)
+* [img](/img/)
