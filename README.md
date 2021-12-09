@@ -6,7 +6,6 @@
   - [Solución Propuesta](#solución-propuesta)
   - [Estructura de la carpeta](#estructura-de-la-carpeta)
   - [Acceso rapido de la carpeta](#acceso-rapido-de-la-carpeta)
-  - [Descripción de los Fuentes](#descripción-de-los-fuentes)
 
 ## Introducción
 
@@ -24,8 +23,15 @@ El diagrama en bloques del sistema propuesto se presenta en la figura anterior. 
 
 * **3.** En base al sistema propuesto, ¿Cómo implementaría la comunicación entre el proceso consumidor (Proxy) y el servidor cloud? Proponga un diagrama de bloques y un diagrama de secuencia del funcionamiento del proceso. 
 
+### Preguntas de interés en la devolución
+
+* **.**  En caso de que el sistema no tenga conectividad hacia el exterior, ¿Qué estrategia utilizaría para evitar pérdida de datos críticos? Proponga herramientas y/o estrategias que se podrían utilizar para dicho fin.
+* **.** ¿Qué problemas encuentra en la arquitectura propuesta para el sistema? Proponga soluciones a los mismos y consecuencias de dichos cambios.
+* **.** ¿Qué cambios considera serían necesarios para adaptar la solución propuesta funcionando en una PC para que funcione en una computadora embebida (RaspberryPi, BeagleBone, etc...)
+
 ## Solución Propuesta
 
+Para la solución propuesta
 
 ## Estructura de la carpeta
 
