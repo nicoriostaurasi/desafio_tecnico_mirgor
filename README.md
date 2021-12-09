@@ -31,9 +31,9 @@ El diagrama en bloques del sistema propuesto se presenta en la figura anterior. 
 
 ## Solución Propuesta
 
-Para la solución propuesta se decidio utilizar el lenguaje C, ya que poseo experiencia utilizando los recursos del sistema operativo Linux mediante este lenguaje. La solución utiliza 2 recursos IPC llamados Memoria Compartida (Shared Memory) y Semáforos (Semaphore). El primero se encarga de almacenar la información que el Productor de Información colecta cada un segundo para que el proceso consumidor (Proxy Server) pueda acceder a ella y el segundo se encarga de lograr un sincronismo entre ambos procesos (Proxy Server y Productor de Información). 
+Para la solución propuesta se decidio utilizar el lenguaje C, ya que se posee experiencia utilizando los recursos del sistema operativo Linux mediante este lenguaje. La solución utiliza 2 recursos IPC llamados Memoria Compartida (Shared Memory) y Semáforos (Semaphore). El primero se encarga de almacenar la información que el Productor de Información colecta cada un segundo para que el proceso consumidor (Proxy Server) pueda acceder a ella y el segundo se encarga de lograr un sincronismo entre ambos procesos (Proxy Server y Productor de Información). 
 
-La solución implementa un buffer de dos semáforos por el cúal siempre uno de los semáforos se encuentra tomado por el proceso productor, cuando se genera una nueva muestra se libera el semáforo tomado y se toma el otro. Por otro lado el proceso colector se encuentra tratando de tomar los semaforos, pero como los mismos ya se encuentran tomados por el otro semáforo se queda esperando a que el mismo este liberado. Siempre que se genere una nueva muestra se escribe en la Shared Memory y se lee desde el otro proceso. Los mensajes son un string con la medición de temperatura en formato decimal.
+La solución implementa un buffer de dos semáforos por el cúal siempre uno de los semáforos se encuentra tomado por el proceso productor, cuando se genera una nueva muestra se libera el semáforo tomado y se toma el otro. Por otro lado el proceso colector se encuentra tratando de tomar los semaforos, pero como los mismos ya se encuentran tomados por el otro semáforo este se queda esperando a que el mismo este liberado (mediante el sheduler de Linux). Siempre que se genere una nueva muestra se escribe en la Shared Memory y se lee desde el otro proceso. Los mensajes son un string con la medición de temperatura en formato decimal.
 
 Para leer la temperatura del CPU se utilizo un paquete llamado [lm-sensors](https://en.wikipedia.org/wiki/Lm_sensors), el cual proporciona la temperatura de los distintos nucleos, encapsulado. Este paquete cuenta con la posibilidad de entregar toda esta información en formato [JSON](https://es.wikipedia.org/wiki/JSON) el cual es una buena forma de leer la información entregada como arbol. El proceso productor se encarga de ejecutar este proceso cada un segundo y capturar la salida del mismo generando un archivo llamado "temperatura.json". Para parsear esta información en C es una tarea que requiere del uso de una libreria [libjson-c-dev](https://packages.debian.org/sid/libjson-c-dev) la cual provee las funciones para realizar la busqueda de arbol dentro de la jerarquía.
 
@@ -46,6 +46,19 @@ Una vez realizado el post pueden darse 2 estados, que la misma haya sido exitosa
 Por lo que podemos observar, de ocurrir un envío fallido se empieza a crear un archivo "error_send.json" el cúal se va a ir completando de forma dinámica ante seguidos envíos fallidos, de ocurrir una cierta cantidad de enviós fallidos previamente definidos el programa termina su ejecución dejando un archivo .json que puede ser levantado por otra aplicación para tratar de publicar cuando el sistema funcione normalmente. Si ocurre un envío exitoso antes de llegar al tope de envíos fallidos el programa trata de levantar el archivo "error_send.json" y enviarlo como un solo paquete, el mismo si es exitoso se pasa a un estado de funcionamiento normal.
 
 Un limitante a la solución propuesta es que el mismo solo prevee un solo proceso colector de información y un único productor. En el caso de poseer "n" productores lo que se planea es que el proceso proxy implemente "n" hilos atascados a un buffer de semáforo comunicandose mediante "n" segmentos de shared memory con los distintos productores. Esto prevee que las frecuencias de muestreo puedan ser distintas para cada sensor. Para sincronizar el acceso de estos hilos a hacer el POST se puede implementar un buffer de dos semáforos para que dos hilos no accedan al mismo recurso. Por cada proceso productor se implementa un segmento de Shared Memory y un semáforo.
+
+Para poder implementar esta solución dentro de un sistema embebido el mismo debe de contar con los paquetes de dependencia antes mencionado. La compilación del código fuente se puede realizar dentro del linux embebido o utilizar un cross-compiler para compilar dentro de la PC y transferir el binario hacia el sistema embebido.
+
+### Como utilizar el Programa:
+
+* Se debe de completar el archivo [cloud_cfg.json](/proxy_server/cloud_cfg.json) el cuál contiene la URL donde se encuentra el cloud server y el mensaje que se desea recibir como confirmación por parte del mismo
+
+* El mismo cuenta con un [Makefile](/proxy_server/Makefile) el cuál se encarga de generar el archivo ejecutable, para correr desde terminal:
+
+```sh
+    make
+```
+* Se deben de instalar los paquetes necesarios: [lm-sensors](https://en.wikipedia.org/wiki/Lm_sensors), [libjson-c-dev](https://packages.debian.org/sid/libjson-c-dev), [curl](https://curl.se/libcurl/c/libcurl.html).
 
 ## Estructura de la carpeta
 
