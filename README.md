@@ -65,7 +65,7 @@ Para poder implementar esta solución dentro de un sistema embebido el mismo deb
 * ***proxy_server***: Se encuentran los fuentes utilizados para resolver el desafío.
 * ***img***: Se encuentran las imagenes utilizadas para documentación.
 
-## Acceso rapido de la carpeta
+## Acceso rápido de la carpeta
 
 * [Proxy Server](/proxy_server/)
   
